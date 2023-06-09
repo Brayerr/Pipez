@@ -26,7 +26,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
     private void Start()
     {
-        if (entity == Entity.Grid && pipeObject == null) SetEmptyState(indexer);
+        if (indexer != Vector2.zero && entity == Entity.Grid && pipeObject == null) SetEmptyState(indexer, entity);
         GameManager.OnRestrict += SetXTrue;
         GameManager.OnCancelRestrict += SetXFalse;
         Pipe.OnPickedPipe += SetEmptyState;
@@ -69,20 +69,44 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         }
     }
 
-    void SetEmptyState(Vector2 index)
+    void SetEmptyState(Vector2 index, Entity entity)
     {
-        if (entity == Entity.Grid && index == indexer && state != State.Empty)
-        {
-            pipeObject = null;
-            state = State.Empty;
-            Debug.Log($"grid {indexer} is empty");
-        }
+        //if (this.entity == entity && index == indexer && state != State.Empty)
+        //{
+            
+        //}
 
-        else if(entity == Entity.Inventory && index == indexer && state != State.Empty)
+        //else if(this.entity == entity && index == indexer && state != State.Empty)
+        //{
+        //    pipeObject = null;
+        //    state = State.Empty;
+        //    Debug.Log($"inventory {indexer} is empty");
+        //}
+
+        switch(entity)
         {
-            pipeObject = null;
-            state = State.Empty;
-            Debug.Log($"inventory {indexer} is empty");
+            case Entity.Grid:
+                {
+                    if(index == indexer && state != State.Empty && this.entity == Entity.Grid)
+                    {
+                        pipeObject = null;
+                        state = State.Empty;
+                        Debug.Log($"grid {indexer} is empty");
+                    }
+                    break;
+                }
+            case Entity.Inventory:
+                {
+                    if(index == indexer && state != State.Empty && this.entity == Entity.Inventory)
+                    {
+                        pipeObject = null;
+                        state = State.Empty;
+                        Debug.Log($"inventory {indexer} is empty");
+                    }
+                    break;
+                }
+            default:
+                break;
         }
     }
 }

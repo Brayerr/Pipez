@@ -7,13 +7,14 @@ using System;
 
 public abstract class Pipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerClickHandler
 {
-    public static Action<Vector2> OnPickedPipe;
+    public static Action<Pipe> OnSendToInventoryRequest;
+    public static Action<Vector2, InventorySlot.Entity> OnPickedPipe;
     public static Action OnPipeTransformChanged;
 
     public State state;
     public PipeColor color;
     [SerializeField] Image image;
-    [SerializeField] InventorySlot? parent;
+    [SerializeField] public InventorySlot parent;
     public Transform parentAfterDrag;
     public RectTransform rectTransform;
 
@@ -43,42 +44,63 @@ public abstract class Pipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEn
         Black
     }
 
+    private void Update()
+    {
+        if(state == State.inDrag && Input.GetMouseButtonUp(1)) RotatePipe();
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (moveable)
         {
-            if (parent != null && parent.entity == InventorySlot.Entity.Grid) OnPickedPipe.Invoke(parent.indexer);
             SetState(State.inDrag);
             GameManager.CheckColorRestriction(color.ToString());
             image.raycastTarget = false;
             parentAfterDrag = transform.parent;
             transform.SetParent(transform.root);
+            if (parent != null)
+            {
+                OnPickedPipe.Invoke(parent.indexer, parent.entity);
+            }
         }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (moveable) transform.position = Input.mousePosition;
+        if (moveable)
+        {
+            transform.position = Input.mousePosition;
+        }
     }
+
+    
 
     public void OnEndDrag(PointerEventData eventData)
     {
         if (moveable)
         {
             image.raycastTarget = true;
-            transform.SetParent(parentAfterDrag);
-            parent = parentAfterDrag.GetComponent<InventorySlot>();
+            RepositionPipe(parentAfterDrag);
             GameManager.ResetColorRestrictions();
-            position = parent.indexer;
             if (parent.entity == InventorySlot.Entity.Grid) SetState(State.inGrid);
-            else if(parent.entity == InventorySlot.Entity.Inventory) SetState(State.inInventory);
+            else if (parent.entity == InventorySlot.Entity.Inventory) SetState(State.inInventory);
             if (parent.entity == InventorySlot.Entity.Grid) OnPipeTransformChanged?.Invoke();
         }
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (moveable) RotatePipe();
+        if (eventData.button == PointerEventData.InputButton.Right && moveable) RotatePipe();
+
+
+        else if (parent.entity == InventorySlot.Entity.Grid && eventData.button == PointerEventData.InputButton.Left && moveable) OnSendToInventoryRequest.Invoke(this);
+    }
+
+    public void RepositionPipe(Transform parentAfterDrag)
+    {
+        transform.SetParent(parentAfterDrag);
+        parent = parentAfterDrag.GetComponent<InventorySlot>();
+        position = parent.indexer;
     }
 
     public virtual void RotatePipe()

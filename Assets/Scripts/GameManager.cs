@@ -82,6 +82,8 @@ public class GameManager : MonoBehaviour
 
     void CreatePath()
     {
+        bool secondPipeExists = true;
+        hasNextTarget = false;
         path.Clear();
         path.Add(defaultPipe);
 
@@ -89,9 +91,13 @@ public class GameManager : MonoBehaviour
 
         if (secondIndex.x != 0 || secondIndex.y != 0) secondSlot = GetSlot(secondIndex);
 
-        if(secondSlot.pipeObject != null) path.Add(secondSlot.pipeObject);
+        if (secondSlot.pipeObject != null)
+        {
+            secondPipeExists = true;
+            path.Add(secondSlot.pipeObject);
+        }
 
-        if(secondSlot.pipeObject != null && CheckIfNextPipeConnectedToCurrent(defaultPipe.position, secondIndex)) hasNextTarget = true;
+        if(secondPipeExists && secondSlot.pipeObject != null && CheckIfNextPipeConnectedToCurrent(defaultPipe.position, secondIndex)) hasNextTarget = true;
 
         while (hasNextTarget)
         {
@@ -145,7 +151,8 @@ public class GameManager : MonoBehaviour
     Vector2 CalculateNextSlot(Vector2 currentIndex)
     {
         InventorySlot currentSlot = GetSlot(currentIndex);
-        int index = path.Count - 2;
+        int index = path.Count -2;
+
 
         if (currentSlot.indexer + currentSlot.pipeObject.exitPoints[0] == path.ElementAt(index).position)
         {

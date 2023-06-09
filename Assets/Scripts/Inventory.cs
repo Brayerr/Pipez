@@ -14,8 +14,10 @@ public class Inventory : MonoBehaviour
 
     private void Start()
     {
+        Pipe.OnSendToInventoryRequest += SetPipeToEmptySlot;
         CreateInventoryItems();
         SetIndexersForSlots();
+        SetInventoryPipesParents();
     }
 
     public void CreateInventoryItems()
@@ -26,6 +28,18 @@ public class Inventory : MonoBehaviour
             Instantiate(item, slots.ElementAt(iterator).transform);
             Pipe pipe = item.GetComponent<Pipe>();
             pipe.SetState(Pipe.State.inInventory);
+            iterator++;
+        }
+    }
+
+    public void SetInventoryPipesParents()
+    {
+        int iterator = 0;
+        foreach (var item in slots)
+        {
+            item.pipeObject = inventory.ElementAt(iterator).GetComponent<Pipe>();
+            item.pipeObject.parent = item;
+            item.pipeObject.parentAfterDrag = item.transform;
             iterator++;
         }
     }
@@ -53,5 +67,19 @@ public class Inventory : MonoBehaviour
         }
     }
 
-
+    public void SetPipeToEmptySlot(Pipe pipe)
+    {
+        foreach (var item in slots)
+        {
+            if (item.state == InventorySlot.State.Empty)
+            {
+                item.pipeObject = pipe;
+                item.state = InventorySlot.State.Occupied;
+                pipe.RepositionPipe(item.transform);
+                pipe.SetState(Pipe.State.inInventory);
+                inventory.Add(pipe.gameObject);
+                break;
+            }
+        }
+    }
 }
