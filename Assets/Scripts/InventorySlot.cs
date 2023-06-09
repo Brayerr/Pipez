@@ -52,7 +52,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
     void SetXTrue(Vector2 index)
     {
-        if (index == indexer && entity == Entity.Grid)
+        if (index == indexer && entity == Entity.Grid && pipeObject == null)
         {
             x.SetActive(true);
             state = State.Occupied;
@@ -64,7 +64,8 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         if (index == indexer && entity == Entity.Grid)
         {
             x.SetActive(false);
-            state = State.Empty;
+
+            if(pipeObject == null) state = State.Empty;
         }
     }
 

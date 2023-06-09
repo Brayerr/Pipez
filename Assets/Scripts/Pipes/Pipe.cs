@@ -20,7 +20,7 @@ public abstract class Pipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEn
     [SerializeField] public Vector2 position;
     public bool isConnected = false;
     public bool moveable = true;
-    [SerializeField]public bool isGoalPiece = false;
+    [SerializeField] public bool isGoalPiece = false;
 
     public Vector2[] exitPoints = new Vector2[2];
 
@@ -47,7 +47,7 @@ public abstract class Pipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEn
     {
         if (moveable)
         {
-            if (parent != null) OnPickedPipe.Invoke(parent.indexer);
+            if (parent != null && parent.entity == InventorySlot.Entity.Grid) OnPickedPipe.Invoke(parent.indexer);
             SetState(State.inDrag);
             GameManager.CheckColorRestriction(color.ToString());
             image.raycastTarget = false;
@@ -70,7 +70,9 @@ public abstract class Pipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEn
             parent = parentAfterDrag.GetComponent<InventorySlot>();
             GameManager.ResetColorRestrictions();
             position = parent.indexer;
-            if(parent.entity == InventorySlot.Entity.Grid) OnPipeTransformChanged?.Invoke();
+            if (parent.entity == InventorySlot.Entity.Grid) SetState(State.inGrid);
+            else if(parent.entity == InventorySlot.Entity.Inventory) SetState(State.inInventory);
+            if (parent.entity == InventorySlot.Entity.Grid) OnPipeTransformChanged?.Invoke();
         }
     }
 
@@ -99,7 +101,7 @@ public abstract class Pipe : MonoBehaviour, IDragHandler, IBeginDragHandler, IEn
                 {
                     this.state = state;
                     transform.localScale = new Vector3(.85f, .85f, 1);
-                    break;             
+                    break;
                 }
             case State.inDrag:
                 {
