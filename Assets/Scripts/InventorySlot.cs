@@ -27,8 +27,8 @@ public class InventorySlot : MonoBehaviour, IDropHandler
     private void Start()
     {
         if (indexer != Vector2.zero && entity == Entity.Grid && pipeObject == null) SetEmptyState(indexer, entity);
-        GameManager.OnRestrict += SetXTrue;
-        GameManager.OnCancelRestrict += SetXFalse;
+        BoardManager.OnRestrict += SetXTrue;
+        BoardManager.OnCancelRestrict += SetXFalse;
         Pipe.OnPickedPipe += SetEmptyState;
     }
 

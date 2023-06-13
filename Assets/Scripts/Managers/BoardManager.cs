@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using System;
+using System.Linq;
 
-public class GameManager : MonoBehaviour
+public class BoardManager : MonoBehaviour
 {
     public static Action<Vector2> OnRestrict;
     public static Action<Vector2> OnCancelRestrict;
@@ -12,20 +12,23 @@ public class GameManager : MonoBehaviour
     public static List<InventorySlot> gameBoard = new List<InventorySlot>();
     [SerializeField] List<InventorySlot> serializedGameBoard = new List<InventorySlot>();
     [SerializeField] List<Pipe> path = new List<Pipe>();
-    [SerializeField] Pipe serializedDefaultPipe;
 
+    [SerializeField] Pipe serializedDefaultPipe;
     public static Pipe defaultPipe;
+
     InventorySlot secondSlot;
 
     [SerializeField] Vector2 boardSize;
 
     private bool hasNextTarget = true;
-
+    
     private void Start()
     {
         defaultPipe = serializedDefaultPipe;
         InitializeBoard();
         Pipe.OnPipeTransformChanged += CreatePath;
+        PipeController.OnDraggingPipe += CheckColorRestriction;
+        PipeController.OnDraggingPipeEnd += ResetColorRestrictions;
     }
 
     void InitializeBoard()
@@ -54,7 +57,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public static void CheckColorRestriction(string color)
+    public void CheckColorRestriction(string color)
     {
         foreach (var item in gameBoard)
         {
@@ -72,7 +75,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public static void ResetColorRestrictions()
+    public void ResetColorRestrictions()
     {
         foreach (var item in gameBoard)
         {
@@ -97,7 +100,7 @@ public class GameManager : MonoBehaviour
             path.Add(secondSlot.pipeObject);
         }
 
-        if(secondPipeExists && secondSlot.pipeObject != null && CheckIfNextPipeConnectedToCurrent(defaultPipe.position, secondIndex)) hasNextTarget = true;
+        if (secondPipeExists && secondSlot.pipeObject != null && CheckIfNextPipeConnectedToCurrent(defaultPipe.position, secondIndex)) hasNextTarget = true;
 
         while (hasNextTarget)
         {
@@ -120,7 +123,7 @@ public class GameManager : MonoBehaviour
                     break;
                 }
 
-                else if(GetSlot(nextIndex).pipeObject != null && CheckIfNextPipeConnectedToCurrent(currentIndex, nextIndex))
+                else if (GetSlot(nextIndex).pipeObject != null && CheckIfNextPipeConnectedToCurrent(currentIndex, nextIndex))
                 {
                     path.Add(GetSlot(nextIndex).pipeObject);
                     //Debug.Log("added next pipe to path" + path.Last().position);
@@ -151,7 +154,7 @@ public class GameManager : MonoBehaviour
     Vector2 CalculateNextSlot(Vector2 currentIndex)
     {
         InventorySlot currentSlot = GetSlot(currentIndex);
-        int index = path.Count -2;
+        int index = path.Count - 2;
 
 
         if (currentSlot.indexer + currentSlot.pipeObject.exitPoints[0] == path.ElementAt(index).position)
@@ -187,7 +190,6 @@ public class GameManager : MonoBehaviour
         else if (nextSlot.pipeObject.exitPoints[1] + nextSlot.indexer == current) return true;
         else return false;
     }
-
 
     InventorySlot GetSlot(Vector2 index)
     {

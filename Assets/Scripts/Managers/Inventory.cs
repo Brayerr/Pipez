@@ -23,24 +23,35 @@ public class Inventory : MonoBehaviour
     public void CreateInventoryItems()
     {
         int iterator = 0;
+        Pipe pipe;
         foreach (var item in inventory)
         {
             Instantiate(item, slots.ElementAt(iterator).transform);
-            Pipe pipe = item.GetComponent<Pipe>();
+            pipe = item.GetComponent<Pipe>();
             pipe.SetState(Pipe.State.inInventory);
+            //pipe.RepositionPipe(slots.ElementAt(iterator).transform);
+            //slots.ElementAt(iterator).pipeObject = pipe;
+            //Debug.Log(slots.ElementAt(iterator).indexer);
             iterator++;
         }
     }
 
     public void SetInventoryPipesParents()
     {
-        int iterator = 0;
-        foreach (var item in slots)
+        //int iterator = 0;
+        //foreach (var item in slots)
+        //{
+        //    slots.ElementAt(iterator).pipeObject = inventory.ElementAt(iterator).GetComponent<Pipe>();
+        //    slots.ElementAt(iterator).pipeObject.parent = slots.ElementAt(iterator);
+        //    slots.ElementAt(iterator).pipeObject.parentAfterDrag = slots.ElementAt(iterator).transform;
+        //    iterator++;
+        //}
+
+        for (int i = 0; i < slots.Count; i++)
         {
-            item.pipeObject = inventory.ElementAt(iterator).GetComponent<Pipe>();
-            item.pipeObject.parent = item;
-            item.pipeObject.parentAfterDrag = item.transform;
-            iterator++;
+            slots[i].pipeObject = inventory[i].GetComponent<Pipe>();
+            slots[i].pipeObject.parent = slots[i];
+            slots[i].pipeObject.parentAfterDrag = slots[i].transform;
         }
     }
 
@@ -73,6 +84,7 @@ public class Inventory : MonoBehaviour
         {
             if (item.state == InventorySlot.State.Empty)
             {
+                Debug.Log($"sending pipe back to inventory to slot - {item.indexer}");
                 item.pipeObject = pipe;
                 item.state = InventorySlot.State.Occupied;
                 pipe.RepositionPipe(item.transform);
