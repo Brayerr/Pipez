@@ -4,8 +4,9 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System;
 
-public class InventorySlot : MonoBehaviour, IDropHandler
+public class InventorySlot : MonoBehaviour
 {
+
     [SerializeField] public Pipe? pipeObject;
     public Vector2 indexer;
     [SerializeField] public State state;
@@ -30,19 +31,6 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         BoardManager.OnRestrict += SetXTrue;
         BoardManager.OnCancelRestrict += SetXFalse;
         Pipe.OnPickedPipe += SetEmptyState;
-    }
-
-    public void OnDrop(PointerEventData eventData)
-    {
-        Pipe pipe = eventData.pointerDrag.GetComponent<Pipe>();
-        if (pipe.moveable && pipeObject == null && state == State.Empty)
-        {
-            pipeObject = pipe;
-            pipeObject.parentAfterDrag = transform;
-            if (entity == Entity.Inventory) pipeObject.SetState(Pipe.State.inInventory);
-            else if (entity == Entity.Grid) pipeObject.SetState(Pipe.State.inGrid);
-            state = State.Occupied;
-        }
     }
 
     public void SetIndexer(Vector2 index)
@@ -71,18 +59,6 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
     void SetEmptyState(Vector2 index, Entity entity)
     {
-        //if (this.entity == entity && index == indexer && state != State.Empty)
-        //{
-            
-        //}
-
-        //else if(this.entity == entity && index == indexer && state != State.Empty)
-        //{
-        //    pipeObject = null;
-        //    state = State.Empty;
-        //    Debug.Log($"inventory {indexer} is empty");
-        //}
-
         switch(entity)
         {
             case Entity.Grid:

@@ -14,10 +14,28 @@ public class Inventory : MonoBehaviour
 
     private void Start()
     {
-        Pipe.OnSendToInventoryRequest += SetPipeToEmptySlot;
+        PipeController.OnSendToInventoryRequest += SetPipeToEmptySlot;
+        PipeController.SentPipeBackToInventory += ReturnPipeToInventory;
         CreateInventoryItems();
         SetIndexersForSlots();
         SetInventoryPipesParents();
+    }
+
+    void ReturnPipeToInventory(Vector2 index, Pipe pipe)
+    {
+        Debug.Log("entered return method");
+
+        foreach (var item in slots)
+        {
+            if (item.indexer == index)
+            {
+                item.state = InventorySlot.State.Occupied;
+                item.pipeObject = pipe;
+                pipe.SetState(Pipe.State.inInventory);
+                Debug.Log("found index");
+
+            }
+        }
     }
 
     public void CreateInventoryItems()
@@ -29,24 +47,12 @@ public class Inventory : MonoBehaviour
             Instantiate(item, slots.ElementAt(iterator).transform);
             pipe = item.GetComponent<Pipe>();
             pipe.SetState(Pipe.State.inInventory);
-            //pipe.RepositionPipe(slots.ElementAt(iterator).transform);
-            //slots.ElementAt(iterator).pipeObject = pipe;
-            //Debug.Log(slots.ElementAt(iterator).indexer);
             iterator++;
         }
     }
 
     public void SetInventoryPipesParents()
     {
-        //int iterator = 0;
-        //foreach (var item in slots)
-        //{
-        //    slots.ElementAt(iterator).pipeObject = inventory.ElementAt(iterator).GetComponent<Pipe>();
-        //    slots.ElementAt(iterator).pipeObject.parent = slots.ElementAt(iterator);
-        //    slots.ElementAt(iterator).pipeObject.parentAfterDrag = slots.ElementAt(iterator).transform;
-        //    iterator++;
-        //}
-
         for (int i = 0; i < slots.Count; i++)
         {
             slots[i].pipeObject = inventory[i].GetComponent<Pipe>();
@@ -78,7 +84,7 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    public void SetPipeToEmptySlot(Pipe pipe)
+    public void SetPipeToEmptySlot(Pipe pipe, InventorySlot slot)
     {
         foreach (var item in slots)
         {
@@ -90,6 +96,8 @@ public class Inventory : MonoBehaviour
                 pipe.RepositionPipe(item.transform);
                 pipe.SetState(Pipe.State.inInventory);
                 inventory.Add(pipe.gameObject);
+                slot.state = InventorySlot.State.Empty;
+                slot.pipeObject = null;
                 break;
             }
         }

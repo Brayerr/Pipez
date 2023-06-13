@@ -24,11 +24,27 @@ public class BoardManager : MonoBehaviour
     
     private void Start()
     {
-        defaultPipe = serializedDefaultPipe;
-        InitializeBoard();
         Pipe.OnPipeTransformChanged += CreatePath;
         PipeController.OnDraggingPipe += CheckColorRestriction;
         PipeController.OnDraggingPipeEnd += ResetColorRestrictions;
+        PipeController.SentPipeBackToBoard += ReturnPipeToBoard;
+        defaultPipe = serializedDefaultPipe;
+        InitializeBoard();
+    }
+
+    void ReturnPipeToBoard(Vector2 index, Pipe pipe)
+    {
+        Debug.Log("entered return method");
+        foreach (var item in gameBoard)
+        {
+            if (item.indexer == index)
+            {
+                item.state = InventorySlot.State.Occupied;
+                item.pipeObject = pipe;
+                pipe.SetState(Pipe.State.inGrid);
+                Debug.Log("found index");
+            }
+        }
     }
 
     void InitializeBoard()
@@ -85,29 +101,45 @@ public class BoardManager : MonoBehaviour
 
     void CreatePath()
     {
-        bool secondPipeExists = true;
+        bool secondPipeExists = false;
         hasNextTarget = false;
         path.Clear();
         path.Add(defaultPipe);
 
         Vector2 secondIndex = CalculateSecondSlot(defaultPipe.position, defaultPipe.exitPoints[0], defaultPipe.exitPoints[1]);
 
-        if (secondIndex.x != 0 || secondIndex.y != 0) secondSlot = GetSlot(secondIndex);
+        if (secondIndex.x != 0 || secondIndex.y != 0) 
+            secondSlot = GetSlot(secondIndex);
 
-        if (secondSlot.pipeObject != null)
+        if (secondSlot.pipeObject != null && CheckIfNextPipeConnectedToCurrent(defaultPipe.position, secondIndex))
         {
             secondPipeExists = true;
             path.Add(secondSlot.pipeObject);
         }
 
-        if (secondPipeExists && secondSlot.pipeObject != null && CheckIfNextPipeConnectedToCurrent(defaultPipe.position, secondIndex)) hasNextTarget = true;
+        else
+        {
+            return;
+        }
+
+        if (secondPipeExists && CheckIfNextPipeConnectedToCurrent(defaultPipe.position, secondIndex)
+            && CalculateNextSlot(secondIndex).x > 0 && CalculateNextSlot(secondIndex).x < boardSize.x
+            || CalculateNextSlot(secondIndex).y > 0 && CalculateNextSlot(secondIndex).y < boardSize.y)
+        {
+            hasNextTarget = true;
+        }
+
+        else
+        {
+            return;
+        }
 
         while (hasNextTarget)
         {
             Vector2 currentIndex = path.Last().position;
             Vector2 nextIndex = CalculateNextSlot(currentIndex);
 
-            if (!CheckNextSlotForObject(nextIndex))
+            if (nextIndex.x <= 0  || nextIndex.x > boardSize.x || nextIndex.y <= 0 || nextIndex.y > boardSize.y && !CheckNextSlotForObject(nextIndex))
             {
                 hasNextTarget = false;
                 break;

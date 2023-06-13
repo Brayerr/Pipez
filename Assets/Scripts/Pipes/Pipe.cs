@@ -7,7 +7,7 @@ using System;
 
 public abstract class Pipe : MonoBehaviour
 {
-    public static Action<Pipe> OnSendToInventoryRequest;
+
     public static Action<Vector2, InventorySlot.Entity> OnPickedPipe;
     public static Action OnPipeTransformChanged;
 
@@ -46,7 +46,8 @@ public abstract class Pipe : MonoBehaviour
 
     public void RepositionPipe(Transform parentAfterDrag)
     {
-        transform.SetParent(transform.root);
+        this.parentAfterDrag = parentAfterDrag;
+        transform.SetParent(parentAfterDrag);
         parent = parentAfterDrag.GetComponent<InventorySlot>();
         position = parent.indexer;
     }
@@ -54,7 +55,7 @@ public abstract class Pipe : MonoBehaviour
     public virtual void RotatePipe()
     {
         transform.Rotate(new Vector3(0, 0, -90));
-        if (state == State.inGrid) OnPipeTransformChanged?.Invoke();
+        if (state == State.inGrid) OnPipeTransformChanged.Invoke();
     }
 
     public void SetState(State state)
