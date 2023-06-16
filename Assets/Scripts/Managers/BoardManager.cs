@@ -8,10 +8,11 @@ public class BoardManager : MonoBehaviour
 {
     public static Action<Vector2> OnRestrict;
     public static Action<Vector2> OnCancelRestrict;
+    public static event Action OnPathComplete;
 
     public static List<InventorySlot> gameBoard = new List<InventorySlot>();
     [SerializeField] List<InventorySlot> serializedGameBoard = new List<InventorySlot>();
-    [SerializeField] List<Pipe> path = new List<Pipe>();
+    [SerializeField] public List<Pipe> path = new List<Pipe>();
 
     [SerializeField] Pipe serializedDefaultPipe;
     public static Pipe defaultPipe;
@@ -138,6 +139,7 @@ public class BoardManager : MonoBehaviour
         {
             Vector2 currentIndex = path.Last().position;
             Vector2 nextIndex = CalculateNextSlot(currentIndex);
+            InventorySlot nextSlot = GetSlot(nextIndex);
 
             if (nextIndex.x <= 0  || nextIndex.x > boardSize.x || nextIndex.y <= 0 || nextIndex.y > boardSize.y && !CheckNextSlotForObject(nextIndex))
             {
@@ -147,17 +149,17 @@ public class BoardManager : MonoBehaviour
 
             else
             {
-                if (GetSlot(nextIndex).pipeObject != null && GetSlot(nextIndex).pipeObject.isGoalPiece && CheckIfNextPipeConnectedToCurrent(currentIndex, nextIndex))
+                if (nextSlot.pipeObject != null && nextSlot.pipeObject.isGoalPiece && CheckIfNextPipeConnectedToCurrent(currentIndex, nextIndex))
                 {
-                    path.Add(GetSlot(nextIndex).pipeObject);
+                    path.Add(nextSlot.pipeObject);
                     hasNextTarget = false;
-                    Debug.Log("level won sequence");
+                    OnPathComplete.Invoke();
                     break;
                 }
 
-                else if (GetSlot(nextIndex).pipeObject != null && CheckIfNextPipeConnectedToCurrent(currentIndex, nextIndex))
+                else if (nextSlot.pipeObject != null && CheckIfNextPipeConnectedToCurrent(currentIndex, nextIndex))
                 {
-                    path.Add(GetSlot(nextIndex).pipeObject);
+                    path.Add(nextSlot.pipeObject);
                     //Debug.Log("added next pipe to path" + path.Last().position);
                 }
 

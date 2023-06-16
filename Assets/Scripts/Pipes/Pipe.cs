@@ -17,6 +17,7 @@ public abstract class Pipe : MonoBehaviour
     [SerializeField] public InventorySlot parent;
     public Transform parentAfterDrag;
     public RectTransform rectTransform;
+    [SerializeField] public Transform wayPoint;
 
     [SerializeField] public Vector2 position;
     public bool isConnected = false;
@@ -24,7 +25,6 @@ public abstract class Pipe : MonoBehaviour
     [SerializeField] public bool isGoalPiece = false;
 
     public Vector2[] exitPoints = new Vector2[2];
-
 
     public enum State
     {

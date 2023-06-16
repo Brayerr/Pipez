@@ -33,10 +33,12 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
             pipeToControll.RotatePipe();
 
 
-        else if (pipeToControll.parent.entity == InventorySlot.Entity.Grid && eventData.button == PointerEventData.InputButton.Left && pipeToControll.moveable)
+        else if (pipeToControll.parent.entity == InventorySlot.Entity.Grid && eventData.button == PointerEventData.InputButton.Left 
+            && pipeToControll.moveable)
         {
             lastSlot = pipeToControll.parent.GetComponent<InventorySlot>();
             OnSendToInventoryRequest.Invoke(pipeToControll,lastSlot);
+            Pipe.OnPipeTransformChanged.Invoke();
         }
     }
 
@@ -51,7 +53,6 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
             pipeToControll.image.raycastTarget = false;
             pipeToControll.parentAfterDrag = transform.parent;
             transform.SetParent(pipeToControll.parentAfterDrag);
-
         }
     }
 
@@ -96,9 +97,12 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         pipeToControll.RepositionPipe(pipeToControll.parentAfterDrag);
         slot.pipeObject = pipeToControll;
         slot.state = InventorySlot.State.Occupied;
+
         if (pipeToControll.parent.entity == InventorySlot.Entity.Grid) pipeToControll.SetState(Pipe.State.inGrid);
         else if (pipeToControll.parent.entity == InventorySlot.Entity.Inventory) pipeToControll.SetState(Pipe.State.inInventory);
+
         if (pipeToControll.parent.entity == InventorySlot.Entity.Grid) Pipe.OnPipeTransformChanged.Invoke();
+
         if (pipeToControll.parent != null)
         {
             Pipe.OnPickedPipe.Invoke(lastSlot.indexer, lastSlot.entity);
