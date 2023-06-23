@@ -35,7 +35,6 @@ public class BoardManager : MonoBehaviour
 
     void ReturnPipeToBoard(Vector2 index, Pipe pipe)
     {
-        Debug.Log("entered return method");
         foreach (var item in gameBoard)
         {
             if (item.indexer == index)
@@ -43,7 +42,6 @@ public class BoardManager : MonoBehaviour
                 item.state = InventorySlot.State.Occupied;
                 item.pipeObject = pipe;
                 pipe.SetState(Pipe.State.inGrid);
-                Debug.Log("found index");
             }
         }
     }
@@ -160,13 +158,11 @@ public class BoardManager : MonoBehaviour
                 else if (nextSlot.pipeObject != null && CheckIfNextPipeConnectedToCurrent(currentIndex, nextIndex))
                 {
                     path.Add(nextSlot.pipeObject);
-                    //Debug.Log("added next pipe to path" + path.Last().position);
                 }
 
                 else
                 {
                     hasNextTarget = false;
-                    //Debug.Log("did not find next pipe");
                 }
             }
         }

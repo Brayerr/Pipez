@@ -67,7 +67,6 @@ public class InventorySlot : MonoBehaviour
                     {
                         pipeObject = null;
                         state = State.Empty;
-                        Debug.Log($"grid {indexer} is empty");
                     }
                     break;
                 }
@@ -77,7 +76,6 @@ public class InventorySlot : MonoBehaviour
                     {
                         pipeObject = null;
                         state = State.Empty;
-                        Debug.Log($"inventory {indexer} is empty");
                     }
                     break;
                 }

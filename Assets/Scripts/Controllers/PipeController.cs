@@ -74,18 +74,15 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
             if (CheckSlotAvailability(slot))
             {
-                Debug.Log("placing pipe");
                 PlacePipe(slot);
             }
             else
             {
-                Debug.Log("returning pipe");
                 ReturnPipe();
             }
         }
         else
         {
-            Debug.Log("returning pipe");
             ReturnPipe();
         }
         OnDraggingPipeEnd.Invoke();

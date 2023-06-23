@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class BottomTopRedPipe : Pipe
 {
+
     private void Start()
     {
         rectTransform = GetComponent<RectTransform>();
+        isStraight = true;
         CalculateExitPoints();
     }
     public override void RotatePipe()

@@ -90,7 +90,6 @@ public class Inventory : MonoBehaviour
         {
             if (item.state == InventorySlot.State.Empty)
             {
-                Debug.Log($"sending pipe back to inventory to slot - {item.indexer}");
                 item.pipeObject = pipe;
                 item.state = InventorySlot.State.Occupied;
                 pipe.RepositionPipe(item.transform);

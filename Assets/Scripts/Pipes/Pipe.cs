@@ -22,6 +22,7 @@ public abstract class Pipe : MonoBehaviour
     [SerializeField] public Vector2 position;
     public bool isConnected = false;
     public bool moveable = true;
+    public bool isStraight = false;
     [SerializeField] public bool isGoalPiece = false;
 
     public Vector2[] exitPoints = new Vector2[2];
