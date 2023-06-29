@@ -8,10 +8,12 @@ public class InventorySlot : MonoBehaviour
 {
 
     [SerializeField] public Pipe? pipeObject;
+    [SerializeField] public Obstacle? obstacleObject;
+    [SerializeField] GameObject x;
+
     public Vector2 indexer;
     [SerializeField] public State state;
     [SerializeField] public Entity entity;
-    [SerializeField] GameObject x;
 
     public enum State
     {
@@ -27,7 +29,7 @@ public class InventorySlot : MonoBehaviour
 
     private void Start()
     {
-        if (indexer != Vector2.zero && entity == Entity.Grid && pipeObject == null) SetEmptyState(indexer, entity);
+        if (indexer != Vector2.zero && entity == Entity.Grid && pipeObject == null && obstacleObject == null) SetEmptyState(indexer, entity);
         BoardManager.OnRestrict += SetXTrue;
         BoardManager.OnCancelRestrict += SetXFalse;
         Pipe.OnPickedPipe += SetEmptyState;
@@ -40,7 +42,7 @@ public class InventorySlot : MonoBehaviour
 
     void SetXTrue(Vector2 index)
     {
-        if (index == indexer && entity == Entity.Grid && pipeObject == null)
+        if (index == indexer && entity == Entity.Grid && pipeObject == null && obstacleObject == null)
         {
             x.SetActive(true);
             state = State.Occupied;

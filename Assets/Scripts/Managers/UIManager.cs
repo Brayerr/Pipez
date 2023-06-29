@@ -6,24 +6,24 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] Canvas boardCanvas;
-    [SerializeField] Camera mainCam;
-    [SerializeField] Camera secondCam;
+    [SerializeField] Canvas? boardCanvas;
+    [SerializeField] Camera? mainCam;
+    [SerializeField] Camera? secondCam;
 
 
     private void Start()
     {
         BoardManager.OnPathComplete += ChangeCanvasRenderMode;
-    }
-
-    void SwitchCamera()
-    {
-        mainCam.enabled = false;
-        secondCam.enabled = true;
+        HamsterController.OnSequenceEnd += ChangeCanvasBack;
     }
 
     void ChangeCanvasRenderMode()
     {
         boardCanvas.renderMode = RenderMode.WorldSpace;
+    }
+
+    void ChangeCanvasBack()
+    {
+        boardCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
     }
 }

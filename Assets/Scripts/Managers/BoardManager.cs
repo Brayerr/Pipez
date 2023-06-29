@@ -9,9 +9,11 @@ public class BoardManager : MonoBehaviour
     public static Action<Vector2> OnRestrict;
     public static Action<Vector2> OnCancelRestrict;
     public static event Action OnPathComplete;
+    public static event Action OnFinishedInitializing;
 
     public static List<InventorySlot> gameBoard = new List<InventorySlot>();
     [SerializeField] List<InventorySlot> serializedGameBoard = new List<InventorySlot>();
+    [SerializeField] List<Obstacle> obstacles = new List<Obstacle>();
     [SerializeField] public List<Pipe> path = new List<Pipe>();
 
     [SerializeField] Pipe serializedDefaultPipe;
@@ -25,12 +27,14 @@ public class BoardManager : MonoBehaviour
     
     private void Start()
     {
+        defaultPipe = serializedDefaultPipe;
+        InitializeBoard();
         Pipe.OnPipeTransformChanged += CreatePath;
         PipeController.OnDraggingPipe += CheckColorRestriction;
         PipeController.OnDraggingPipeEnd += ResetColorRestrictions;
         PipeController.SentPipeBackToBoard += ReturnPipeToBoard;
-        defaultPipe = serializedDefaultPipe;
-        InitializeBoard();
+        //SetSlotsOccupied();
+        //Obstacle.OnCalculatedBlockedTiles += SetSlotsOccupied;
     }
 
     void ReturnPipeToBoard(Vector2 index, Pipe pipe)
@@ -70,6 +74,7 @@ public class BoardManager : MonoBehaviour
                 iterator = 0;
             }
         }
+        OnFinishedInitializing.Invoke();
     }
 
     public void CheckColorRestriction(string color)
@@ -78,7 +83,7 @@ public class BoardManager : MonoBehaviour
 
         foreach (var item in gameBoard)
         {
-            if (item.state == InventorySlot.State.Occupied && item.pipeObject != null
+            if (item.state == InventorySlot.State.Occupied && item.obstacleObject == null && item.pipeObject != null
                 && item.pipeObject.state == Pipe.State.inGrid && item.pipeObject.color.ToString() == color)
             {
                 foreach (var inventorySlot in gameBoard)
@@ -222,6 +227,23 @@ public class BoardManager : MonoBehaviour
         else if (nextSlot.pipeObject.exitPoints[1] + nextSlot.indexer == current) return true;
         else return false;
     }
+
+    //void SetSlotsOccupied()
+    //{
+    //    int iterator = 0;
+    //    foreach (var item in obstacles)
+    //    {
+    //        foreach (var tile in gameBoard)
+    //        {
+    //            if (item.blockedTiles[iterator] == tile.indexer)
+    //            {
+    //                tile.state = InventorySlot.State.Occupied;
+    //                iterator++;
+    //            }
+                
+    //        }
+    //    }
+    //}
 
     InventorySlot GetSlot(Vector2 index)
     {

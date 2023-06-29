@@ -7,7 +7,7 @@ using System;
 
 public class HamsterController : MonoBehaviour
 {
-    public static event Action OnStartedSequence;
+    public static event Action OnSequenceEnd;
 
     [SerializeField] BoardManager boardManager;
     [SerializeField] Transform hamsterTransform;
@@ -134,7 +134,10 @@ public class HamsterController : MonoBehaviour
         {
             hamsterTransform.DORotate(new Vector3(0, 0, 0), .2f).OnComplete(() =>
             {
-                hamsterTransform.DOMove(endPosition.position, 1);
+                hamsterTransform.DOMove(endPosition.position, 1).OnComplete(() =>
+                {
+                    OnSequenceEnd.Invoke();
+                });
             });
             
         });

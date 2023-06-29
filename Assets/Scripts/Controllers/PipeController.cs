@@ -100,7 +100,7 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
         if (pipeToControll.parent.entity == InventorySlot.Entity.Grid) Pipe.OnPipeTransformChanged.Invoke();
 
-        if (pipeToControll.parent != null)
+        if (pipeToControll.parent != null && pipeToControll.parent.obstacleObject == null)
         {
             Pipe.OnPickedPipe.Invoke(lastSlot.indexer, lastSlot.entity);
         }
@@ -118,7 +118,8 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
     bool CheckSlotAvailability(InventorySlot slot)
     {
-        if (slot.state == InventorySlot.State.Empty && slot.pipeObject == null) return true;
+        if (slot.state == InventorySlot.State.Empty && slot.pipeObject == null && slot.obstacleObject == null) return true;
+        else if (slot.state == InventorySlot.State.Occupied) return false;
         else return false;
     }
 }
