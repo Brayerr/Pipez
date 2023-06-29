@@ -104,6 +104,8 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         {
             Pipe.OnPickedPipe.Invoke(lastSlot.indexer, lastSlot.entity);
         }
+        pipeToControll.rectTransform.localPosition = new Vector3(pipeToControll.rectTransform.localPosition.x, pipeToControll.rectTransform.localPosition.y, 1);
+
     }
 
     void ReturnPipe()

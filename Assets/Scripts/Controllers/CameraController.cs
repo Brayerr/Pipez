@@ -1,35 +1,33 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] Camera cam;
-    [SerializeField] Transform hamsterTransform;
 
-    bool shouldFollow = false;
+    [SerializeField] Transform hamsterTransform;
+    [SerializeField] Camera cam;
+
     private void Start()
     {
         cam = GetComponent<Camera>();
-        HamsterController.OnStartedSequence += ZoomIn;
+
     }
 
     private void Update()
     {
-        if(shouldFollow)
-        {
-            FollowHamster();
-        }
+
+        FollowHamster();
     }
 
     void FollowHamster()
     {
-            cam.transform.position = hamsterTransform.position;
+        cam.transform.position = new Vector3(hamsterTransform.position.x, hamsterTransform.position.y, cam.transform.position.z);
     }
 
-    void ZoomIn()
+    void MoveCamera(Vector2 pos)
     {
-        cam.orthographicSize = 1.5f;
-        shouldFollow = true;
+        transform.DOMove(pos, .5f);
     }
 }

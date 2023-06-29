@@ -74,6 +74,8 @@ public class BoardManager : MonoBehaviour
 
     public void CheckColorRestriction(string color)
     {
+        if (color == "Black") return;
+
         foreach (var item in gameBoard)
         {
             if (item.state == InventorySlot.State.Occupied && item.pipeObject != null

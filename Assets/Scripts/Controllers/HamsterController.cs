@@ -14,17 +14,14 @@ public class HamsterController : MonoBehaviour
     [SerializeField] Image hamsterImage;
     [SerializeField] Animator anim;
 
-    [SerializeField] float tweenDuration = 2f;
     State state;
     Vector3 lastWayPoint;
     [SerializeField] Transform endPosition;
     State[] sequenceStates;
     int stateIterator = 0;
 
-    float idleTweenDuration = 3;
     float walkTweenDuration = 1.5f;
     float walkTwiceTweenDuration = 4;
-    float fallTweenDuration = 2;
     float climbTweenDuration = 2;
 
 
@@ -59,6 +56,7 @@ public class HamsterController : MonoBehaviour
         float r;
         State s;
         int iterator = 0;
+        Tween tween;
         foreach (var item in boardManager.path)
         {
 
@@ -99,20 +97,22 @@ public class HamsterController : MonoBehaviour
                 if (sequenceStates[iterator] == State.Walk)
                 {
                     sequence.Append(hamsterTransform.DORotate(new Vector3(0, 0, r), .2f));
-                    sequence.Append(hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration));
-
+                    tween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration);
+                    sequence.Append(tween);
                 }
 
                 else if (sequenceStates[iterator] == State.WalkTwice)
                 {
                     sequence.Append(hamsterTransform.DORotate(new Vector3(0, 0, r), .2f));
-                    sequence.Append(hamsterTransform.DOMove(item.wayPoint.position, walkTwiceTweenDuration));
+                    tween = hamsterTransform.DOMove(item.wayPoint.position, walkTwiceTweenDuration);
+                    sequence.Append(tween);
                 }
 
                 else
                 {
                     sequence.Append(hamsterTransform.DORotate(new Vector3(0, 0, 0), .2f));
-                    sequence.Append(hamsterTransform.DOMove(item.wayPoint.position, climbTweenDuration));
+                    tween = hamsterTransform.DOMove(item.wayPoint.position, climbTweenDuration);
+                    sequence.Append(tween);
                 }
 
                 lastWayPoint = item.wayPoint.position;
@@ -127,9 +127,9 @@ public class HamsterController : MonoBehaviour
 
     void MoveThroughPipes(Sequence seq)
     {
-        hamsterImage.color = new Color(hamsterImage.color.r, hamsterImage.color.g, hamsterImage.color.b, .7f);
+        hamsterImage.DOFade(.7f, .1f);
         seq.Play();
-        OnStartedSequence.Invoke();
+        //OnStartedSequence.Invoke();
         seq.OnComplete(() =>
         {
             hamsterTransform.DORotate(new Vector3(0, 0, 0), .2f).OnComplete(() =>
@@ -138,7 +138,7 @@ public class HamsterController : MonoBehaviour
             });
             
         });
-        hamsterImage.color = new Color(hamsterImage.color.r, hamsterImage.color.g, hamsterImage.color.b, 1);
+        hamsterImage.DOFade(1, .1f);
         Debug.Log("playing sequence");
     }
 
