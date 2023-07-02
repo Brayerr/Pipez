@@ -9,7 +9,6 @@ public class BoardManager : MonoBehaviour
     public static Action<Vector2> OnRestrict;
     public static Action<Vector2> OnCancelRestrict;
     public static event Action OnPathComplete;
-    //public static event Action OnFinishedInitializing;
 
     public static List<InventorySlot> gameBoard = new List<InventorySlot>();
     [SerializeField] List<InventorySlot> serializedGameBoard = new List<InventorySlot>();

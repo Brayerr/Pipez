@@ -2018,6 +2018,14 @@ PrefabInstance:
       propertyPath: boardManager
       value: 
       objectReference: {fileID: 1808391414}
+    - target: {fileID: 5451192583228217930, guid: 8a706a491381bda419abcce3af29e2cf, type: 3}
+      propertyPath: firstWayPoint.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5451192583228217930, guid: 8a706a491381bda419abcce3af29e2cf, type: 3}
+      propertyPath: firstWayPoint.y
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 5451192583228217942, guid: 8a706a491381bda419abcce3af29e2cf, type: 3}
       propertyPath: m_Name
       value: Hamster
@@ -3877,6 +3885,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardCanvas: {fileID: 1808391415}
+  inventoryCanvas: {fileID: 964292317}
   mainCam: {fileID: 729993402}
   secondCam: {fileID: 2132906561}
   pauseMenu: {fileID: 1226002424}

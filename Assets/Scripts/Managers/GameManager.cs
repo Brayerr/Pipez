@@ -16,24 +16,9 @@ public class GameManager : MonoBehaviour
         currentScene = 0;
     }
 
-    private void OnEnable()
-    {
-        BoardManager.OnPathComplete += LevelWon;        
-    }
-
-    private void OnDestroy()
-    {
-        BoardManager.OnPathComplete -= LevelWon;
-    }
-
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape)) OnClickedEsc.Invoke();
-    }
-
-    void LevelWon()
-    {
-        Debug.Log("level won sequence");
     }
 
     public void LoadMainMenu()

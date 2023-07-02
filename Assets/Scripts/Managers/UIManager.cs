@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     [SerializeField] Canvas? boardCanvas;
+    [SerializeField] Canvas? inventoryCanvas;
     [SerializeField] Camera? mainCam;
     [SerializeField] Camera? secondCam;
 
@@ -33,11 +34,13 @@ public class UIManager : MonoBehaviour
 
     void ChangeCanvasRenderMode()
     {
+        inventoryCanvas.gameObject.SetActive(false);
         boardCanvas.renderMode = RenderMode.WorldSpace;
     }
 
     void ChangeCanvasBack()
     {
+        inventoryCanvas.gameObject.SetActive(true);
         boardCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
     }
 

@@ -3757,6 +3757,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardCanvas: {fileID: 1808391415}
+  inventoryCanvas: {fileID: 964292317}
   mainCam: {fileID: 729993402}
   secondCam: {fileID: 2132906561}
   pauseMenu: {fileID: 1351647078}

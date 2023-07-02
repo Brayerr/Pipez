@@ -15,7 +15,7 @@ public class HamsterController : MonoBehaviour
     [SerializeField] Animator anim;
 
     [SerializeField] State currentState = State.Idle;
-    [SerializeField] State previousState;
+    [SerializeField] State previousState = State.Idle;
     [SerializeField] Vector2 firstWayPoint;
     [SerializeField] Vector2 lastWayPoint;
     [SerializeField] Transform endPosition;
@@ -24,6 +24,8 @@ public class HamsterController : MonoBehaviour
     float walkTweenDuration = 1.5f;
     float climbTweenDuration = 2;
 
+    bool isFlipped;
+
 
 
     enum State
@@ -31,12 +33,15 @@ public class HamsterController : MonoBehaviour
         Idle,
         IdleToWalk,
         Walk,
+        WalkFlipped,
         WalkTwice,
         Climb,
         Fall,
         Land,
         WalkToClimb,
-        ClimbToWalk
+        WalkToClimbFlipped,
+        ClimbToWalk,
+        Dance
     }
 
 
@@ -68,26 +73,38 @@ public class HamsterController : MonoBehaviour
         Tween transitionTween;
         int durationMultiplier = 1;
         sequence.Append(hamsterImage.DOFade(.7f, .2f));
+        sequence.AppendCallback(() =>
+        {
+            SetState(State.IdleToWalk);
+        });
+        sequence.AppendCallback(() =>
+        {
+            SetState(State.Walk);
+        });
 
         foreach (var item in boardManager.path)
         {
             direction = GetNormalizedRoundedDirection(lastWayPoint, item.position);
             rotation = GetZAxisRotation(direction);
-            
+
             if (item.isStraight)
             {
                 State s = GetCurrentState(direction);
-                durationMultiplier++;
                 sequence.AppendCallback(() =>
                 {
                     SetState(s);
                 });
+
+
+
+                durationMultiplier++;
                 continue;
             }
 
             else
             {
-                SetState(GetCurrentState(direction));
+                previousState = currentState;
+                currentState = (GetCurrentState(direction));
 
                 //from falling to walking
                 if (previousState == State.Fall && currentState == State.Walk)
@@ -101,33 +118,20 @@ public class HamsterController : MonoBehaviour
                         SetState(State.Land);
                     });
 
-                    movementTween.OnPlay(() =>
+                    if (!isFlipped)
                     {
-                        SetState(State.Walk);
-                    });
-
-                    sequence.Append(transitionTween);
-                    sequence.Append(rotationTween);
-                    sequence.Append(movementTween);
-                    durationMultiplier = 1;
-                }
-
-                //from falling to walking
-                else if (previousState == State.Fall && currentState == State.WalkTwice)
-                {
-                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, rotation), .2f);
-                    transitionTween = hamsterTransform.DOScaleZ(.5f, .2f);
-                    movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
-
-                    transitionTween.OnPlay(() =>
+                        movementTween.OnPlay(() =>
+                        {
+                            SetState(State.Walk);
+                        });
+                    }
+                    else
                     {
-                        SetState(State.Land);
-                    });
-
-                    movementTween.OnPlay(() =>
-                    {
-                        SetState(State.WalkTwice);
-                    });
+                        movementTween.OnPlay(() =>
+                        {
+                            SetState(State.WalkFlipped);
+                        });
+                    }
 
                     sequence.Append(transitionTween);
                     sequence.Append(rotationTween);
@@ -142,10 +146,21 @@ public class HamsterController : MonoBehaviour
                     transitionTween = hamsterTransform.DOScaleZ(.5f, .2f);
                     movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
 
-                    transitionTween.OnPlay(() =>
+                    if (!isFlipped)
                     {
-                        SetState(State.WalkToClimb);
-                    });
+                        transitionTween.OnPlay(() =>
+                        {
+                            SetState(State.WalkToClimb);
+                        });
+                    }
+
+                    else
+                    {
+                        transitionTween.OnPlay(() =>
+                        {
+                            SetState(State.WalkToClimbFlipped);
+                        });
+                    }
 
                     movementTween.OnPlay(() =>
                     {
@@ -170,10 +185,20 @@ public class HamsterController : MonoBehaviour
                         SetState(State.IdleToWalk);
                     });
 
-                    movementTween.OnPlay(() =>
+                    if (!isFlipped)
                     {
-                        SetState(State.Walk);
-                    });
+                        movementTween.OnPlay(() =>
+                        {
+                            SetState(State.Walk);
+                        });
+                    }
+                    else
+                    {
+                        movementTween.OnPlay(() =>
+                        {
+                            SetState(State.WalkFlipped);
+                        });
+                    }
 
                     sequence.Append(transitionTween);
                     sequence.Append(rotationTween);
@@ -188,10 +213,20 @@ public class HamsterController : MonoBehaviour
                     transitionTween = hamsterTransform.DOScaleZ(.5f, .2f);
                     movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
 
-                    transitionTween.OnPlay(() =>
+                    if (!isFlipped)
                     {
-                        SetState(State.WalkToClimb);
-                    });
+                        transitionTween.OnPlay(() =>
+                        {
+                            SetState(State.WalkToClimb);
+                        });
+                    }
+                    else
+                    {
+                        transitionTween.OnPlay(() =>
+                        {
+                            SetState(State.WalkToClimbFlipped);
+                        });
+                    }
 
                     movementTween.OnPlay(() =>
                     {
@@ -216,10 +251,20 @@ public class HamsterController : MonoBehaviour
                         SetState(State.ClimbToWalk);
                     });
 
-                    movementTween.OnPlay(() =>
+                    if (!isFlipped)
                     {
-                        SetState(State.Walk);
-                    });
+                        movementTween.OnPlay(() =>
+                        {
+                            SetState(State.Walk);
+                        });
+                    }
+                    else
+                    {
+                        movementTween.OnPlay(() =>
+                        {
+                            SetState(State.WalkFlipped);
+                        });
+                    }
 
                     sequence.Append(transitionTween);
                     sequence.Append(rotationTween);
@@ -230,16 +275,27 @@ public class HamsterController : MonoBehaviour
                 //only walking
                 else if (currentState == State.Walk)
                 {
-                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, rotation), .2f);
+                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, rotation), .1f);
                     movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
 
-                    movementTween.OnPlay(() =>
+                    if (!isFlipped)
                     {
-                        SetState(State.Walk);
-                    });
-
-                    sequence.Append(rotationTween);
-                    sequence.Append(movementTween);
+                        movementTween.OnPlay(() =>
+                        {
+                            SetState(State.Walk);
+                        });
+                        sequence.Append(rotationTween);
+                        sequence.Append(movementTween);
+                    }
+                    else
+                    {
+                        movementTween.OnPlay(() =>
+                        {
+                            SetState(State.WalkFlipped);
+                        });
+                        sequence.Append(rotationTween);
+                        sequence.Join(movementTween);
+                    }
                     durationMultiplier = 1;
                 }
 
@@ -253,6 +309,7 @@ public class HamsterController : MonoBehaviour
                     sequence.Append(movementTween);
                     durationMultiplier = 1;
                 }
+
                 lastWayPoint = item.parent.indexer;
             }
         }
@@ -271,7 +328,19 @@ public class HamsterController : MonoBehaviour
                 hamsterTransform.DOMove(endPosition.position, climbTweenDuration).OnComplete(() =>
                 {
                     hamsterImage.color = new Color(hamsterImage.color.r, hamsterImage.color.g, hamsterImage.color.b, 1);
-                    OnSequenceEnd.Invoke();
+                    hamsterTransform.DOScaleZ(.5f, .2f).OnPlay(() =>
+                    {
+                        SetState(State.WalkToClimb);
+                    }).OnComplete(() =>
+                    {
+                        hamsterTransform.DOScaleZ(.5f, 2).OnPlay(() =>
+                        {
+                            SetState(State.Dance);
+                        }).OnComplete(() =>
+                        {
+                            OnSequenceEnd.Invoke();
+                        });
+                    });
                 });
             });
         });
@@ -295,25 +364,25 @@ public class HamsterController : MonoBehaviour
         {
             case Vector2 v when v == new Vector2(1, 1):
                 {
-
+                    isFlipped = false;
                     return -45;
                 }
 
             case Vector2 v when v == new Vector2(1, -1):
                 {
-
+                    isFlipped = false;
                     return 45;
                 }
 
             case Vector2 v when v == new Vector2(-1, -1):
                 {
-
+                    isFlipped = true;
                     return -45;
                 }
 
             case Vector2 v when v == new Vector2(-1, 1):
                 {
-
+                    isFlipped = true;
                     return 45;
                 }
 
@@ -409,6 +478,15 @@ public class HamsterController : MonoBehaviour
                     break;
                 }
 
+            case State.WalkFlipped:
+                {
+                    previousState = currentState;
+                    currentState = state;
+                    anim.SetTrigger("WalkFlipped");
+                    Debug.Log("walkflipped");
+                    break;
+                }
+
             case State.Climb:
                 {
                     previousState = currentState;
@@ -445,6 +523,15 @@ public class HamsterController : MonoBehaviour
                     break;
                 }
 
+            case State.WalkToClimbFlipped:
+                {
+                    previousState = currentState;
+                    currentState = state;
+                    anim.SetTrigger("WalkToClimbFlipped");
+                    Debug.Log("walktoclimbflipped");
+                    break;
+                }
+
             case State.ClimbToWalk:
                 {
                     previousState = currentState;
@@ -459,6 +546,15 @@ public class HamsterController : MonoBehaviour
                     currentState = state;
                     anim.SetTrigger("Land");
                     Debug.Log("land");
+                    break;
+                }
+
+            case State.Dance:
+                {
+                    previousState = currentState;
+                    currentState = state;
+                    anim.SetTrigger("Dance");
+                    Debug.Log("dance");
                     break;
                 }
 
