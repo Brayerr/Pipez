@@ -14,7 +14,7 @@ public abstract class Obstacle : MonoBehaviour
 
     private void Start()
     {
-        BoardManager.OnFinishedInitializing += InitilizingSequence;
+        //BoardManager.OnFinishedInitializing += InitilizingSequence;
     }
 
     void InitilizingSequence()

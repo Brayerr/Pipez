@@ -30,9 +30,22 @@ public class InventorySlot : MonoBehaviour
     private void Start()
     {
         if (indexer != Vector2.zero && entity == Entity.Grid && pipeObject == null && obstacleObject == null) SetEmptyState(indexer, entity);
+        
+    }
+
+
+    private void OnEnable()
+    {
         BoardManager.OnRestrict += SetXTrue;
         BoardManager.OnCancelRestrict += SetXFalse;
         Pipe.OnPickedPipe += SetEmptyState;
+    }
+
+    private void OnDestroy()
+    {
+        BoardManager.OnRestrict -= SetXTrue;
+        BoardManager.OnCancelRestrict -= SetXFalse;
+        Pipe.OnPickedPipe -= SetEmptyState;
     }
 
     public void SetIndexer(Vector2 index)

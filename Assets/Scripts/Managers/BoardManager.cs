@@ -9,14 +9,14 @@ public class BoardManager : MonoBehaviour
     public static Action<Vector2> OnRestrict;
     public static Action<Vector2> OnCancelRestrict;
     public static event Action OnPathComplete;
-    public static event Action OnFinishedInitializing;
+    //public static event Action OnFinishedInitializing;
 
     public static List<InventorySlot> gameBoard = new List<InventorySlot>();
     [SerializeField] List<InventorySlot> serializedGameBoard = new List<InventorySlot>();
     [SerializeField] List<Obstacle> obstacles = new List<Obstacle>();
     [SerializeField] public List<Pipe> path = new List<Pipe>();
 
-    [SerializeField] Pipe serializedDefaultPipe;
+    [SerializeField] public Pipe serializedDefaultPipe;
     public static Pipe defaultPipe;
 
     InventorySlot secondSlot;
@@ -29,12 +29,25 @@ public class BoardManager : MonoBehaviour
     {
         defaultPipe = serializedDefaultPipe;
         InitializeBoard();
+        //SetSlotsOccupied();
+        //Obstacle.OnCalculatedBlockedTiles += SetSlotsOccupied;
+    }
+
+
+    private void OnEnable()
+    {
         Pipe.OnPipeTransformChanged += CreatePath;
         PipeController.OnDraggingPipe += CheckColorRestriction;
         PipeController.OnDraggingPipeEnd += ResetColorRestrictions;
         PipeController.SentPipeBackToBoard += ReturnPipeToBoard;
-        //SetSlotsOccupied();
-        //Obstacle.OnCalculatedBlockedTiles += SetSlotsOccupied;
+    }
+
+    private void OnDestroy()
+    {
+        Pipe.OnPipeTransformChanged -= CreatePath;
+        PipeController.OnDraggingPipe -= CheckColorRestriction;
+        PipeController.OnDraggingPipeEnd -= ResetColorRestrictions;
+        PipeController.SentPipeBackToBoard -= ReturnPipeToBoard;
     }
 
     void ReturnPipeToBoard(Vector2 index, Pipe pipe)
@@ -54,15 +67,18 @@ public class BoardManager : MonoBehaviour
     {
         Vector2 index = new Vector2(1, 1);
         int iterator = 0;
+        gameBoard.Clear();
 
         foreach (var item in serializedGameBoard)
         {
             gameBoard.Add(item);
         }
 
+
         foreach (var item in gameBoard)
         {
             item.SetIndexer(index);
+
             if (iterator < boardSize.x - 1)
             {
                 index = new Vector2(index.x + 1, index.y);
@@ -74,7 +90,7 @@ public class BoardManager : MonoBehaviour
                 iterator = 0;
             }
         }
-        OnFinishedInitializing.Invoke();
+        //OnFinishedInitializing.Invoke();
     }
 
     public void CheckColorRestriction(string color)

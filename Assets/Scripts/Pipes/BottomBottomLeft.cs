@@ -9,6 +9,7 @@ public class BottomBottomLeft : Pipe
         rectTransform = GetComponent<RectTransform>();
         CalculateExitPoints();
     }
+
     public override void RotatePipe()
     {
         base.RotatePipe();

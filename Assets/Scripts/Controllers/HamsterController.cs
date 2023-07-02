@@ -14,14 +14,14 @@ public class HamsterController : MonoBehaviour
     [SerializeField] Image hamsterImage;
     [SerializeField] Animator anim;
 
-    State state;
-    Vector3 lastWayPoint;
+    [SerializeField] State currentState = State.Idle;
+    [SerializeField] State previousState;
+    [SerializeField] Vector2 firstWayPoint;
+    [SerializeField] Vector2 lastWayPoint;
     [SerializeField] Transform endPosition;
-    State[] sequenceStates;
-    int stateIterator = 0;
+    [SerializeField] Vector2 direction = new Vector2(1, 0);
 
     float walkTweenDuration = 1.5f;
-    float walkTwiceTweenDuration = 4;
     float climbTweenDuration = 2;
 
 
@@ -29,13 +29,14 @@ public class HamsterController : MonoBehaviour
     enum State
     {
         Idle,
+        IdleToWalk,
         Walk,
         WalkTwice,
         Climb,
         Fall,
         Land,
-        WalkTo,
-        ToWalk
+        WalkToClimb,
+        ClimbToWalk
     }
 
 
@@ -44,106 +45,239 @@ public class HamsterController : MonoBehaviour
         hamsterTransform = transform;
         hamsterImage = GetComponent<Image>();
         anim = GetComponent<Animator>();
+    }
+
+    private void OnEnable()
+    {
         BoardManager.OnPathComplete += CreateSequenceTest;
-        lastWayPoint = transform.position;
+        GameManager.OnChangedScene += KillAllTweens;
+    }
+
+    private void OnDestroy()
+    {
+        BoardManager.OnPathComplete -= CreateSequenceTest;
+        GameManager.OnChangedScene -= KillAllTweens;
     }
 
     void CreateSequenceTest()
     {
         Sequence sequence = DOTween.Sequence();
-        sequenceStates = new State[boardManager.path.Count];
-        Vector2 direction;
-        float r;
-        State s;
-        int iterator = 0;
-        Tween tween;
+        float rotation;
+        Tween movementTween;
+        Tween rotationTween;
+        Tween transitionTween;
+        int durationMultiplier = 1;
+        sequence.Append(hamsterImage.DOFade(.7f, .2f));
+
         foreach (var item in boardManager.path)
         {
-
-            direction = GetNormalizedRoundedDirection(lastWayPoint, item.wayPoint.position);
-            r = GetZAxisRotation(direction);
-            s = GetCurrentState(direction);
-            sequenceStates[iterator] = s;
-
+            direction = GetNormalizedRoundedDirection(lastWayPoint, item.position);
+            rotation = GetZAxisRotation(direction);
+            
             if (item.isStraight)
             {
+                State s = GetCurrentState(direction);
+                durationMultiplier++;
                 sequence.AppendCallback(() =>
                 {
-                    if (sequenceStates[stateIterator] == State.Walk)
-                    {
-                        SetState(State.WalkTwice);
-                    }
-
-                    else
-                        SetState(sequenceStates[stateIterator]);
-
-                    stateIterator++;
+                    SetState(s);
                 });
-
-                iterator++;
                 continue;
             }
 
-
-
             else
             {
-                sequence.AppendCallback(() =>
-                {
-                    SetState(sequenceStates[stateIterator]);
-                    stateIterator++;
-                });
+                SetState(GetCurrentState(direction));
 
-                if (sequenceStates[iterator] == State.Walk)
+                //from falling to walking
+                if (previousState == State.Fall && currentState == State.Walk)
                 {
-                    sequence.Append(hamsterTransform.DORotate(new Vector3(0, 0, r), .2f));
-                    tween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration);
-                    sequence.Append(tween);
+                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, rotation), .2f);
+                    transitionTween = hamsterTransform.DOScaleZ(.5f, .2f);
+                    movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
+
+                    transitionTween.OnPlay(() =>
+                    {
+                        SetState(State.Land);
+                    });
+
+                    movementTween.OnPlay(() =>
+                    {
+                        SetState(State.Walk);
+                    });
+
+                    sequence.Append(transitionTween);
+                    sequence.Append(rotationTween);
+                    sequence.Append(movementTween);
+                    durationMultiplier = 1;
                 }
 
-                else if (sequenceStates[iterator] == State.WalkTwice)
+                //from falling to walking
+                else if (previousState == State.Fall && currentState == State.WalkTwice)
                 {
-                    sequence.Append(hamsterTransform.DORotate(new Vector3(0, 0, r), .2f));
-                    tween = hamsterTransform.DOMove(item.wayPoint.position, walkTwiceTweenDuration);
-                    sequence.Append(tween);
+                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, rotation), .2f);
+                    transitionTween = hamsterTransform.DOScaleZ(.5f, .2f);
+                    movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
+
+                    transitionTween.OnPlay(() =>
+                    {
+                        SetState(State.Land);
+                    });
+
+                    movementTween.OnPlay(() =>
+                    {
+                        SetState(State.WalkTwice);
+                    });
+
+                    sequence.Append(transitionTween);
+                    sequence.Append(rotationTween);
+                    sequence.Append(movementTween);
+                    durationMultiplier = 1;
                 }
 
+                //from walking to climbing
+                else if (previousState == State.Walk && currentState == State.Climb)
+                {
+                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, rotation), .01f);
+                    transitionTween = hamsterTransform.DOScaleZ(.5f, .2f);
+                    movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
+
+                    transitionTween.OnPlay(() =>
+                    {
+                        SetState(State.WalkToClimb);
+                    });
+
+                    movementTween.OnPlay(() =>
+                    {
+                        SetState(State.Climb);
+                    });
+
+                    sequence.Append(transitionTween);
+                    sequence.Append(rotationTween);
+                    sequence.Append(movementTween);
+                    durationMultiplier = 1;
+                }
+
+                //from idle to walking
+                else if (previousState == State.Idle && currentState == State.Walk)
+                {
+                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, rotation), .2f);
+                    transitionTween = hamsterTransform.DOScaleZ(.5f, .2f);
+                    movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
+
+                    transitionTween.OnPlay(() =>
+                    {
+                        SetState(State.IdleToWalk);
+                    });
+
+                    movementTween.OnPlay(() =>
+                    {
+                        SetState(State.Walk);
+                    });
+
+                    sequence.Append(transitionTween);
+                    sequence.Append(rotationTween);
+                    sequence.Append(movementTween);
+                    durationMultiplier = 1;
+                }
+
+                //from walking to falling
+                else if (previousState == State.Walk && currentState == State.Fall)
+                {
+                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, rotation), .2f);
+                    transitionTween = hamsterTransform.DOScaleZ(.5f, .2f);
+                    movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
+
+                    transitionTween.OnPlay(() =>
+                    {
+                        SetState(State.WalkToClimb);
+                    });
+
+                    movementTween.OnPlay(() =>
+                    {
+                        SetState(State.Fall);
+                    });
+
+                    sequence.Append(transitionTween);
+                    sequence.Append(rotationTween);
+                    sequence.Append(movementTween);
+                    durationMultiplier = 1;
+                }
+
+                //from climbing to walking
+                else if (previousState == State.Climb && currentState == State.Walk)
+                {
+                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, rotation), .2f);
+                    transitionTween = hamsterTransform.DOScaleZ(.5f, .2f);
+                    movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
+
+                    transitionTween.OnPlay(() =>
+                    {
+                        SetState(State.ClimbToWalk);
+                    });
+
+                    movementTween.OnPlay(() =>
+                    {
+                        SetState(State.Walk);
+                    });
+
+                    sequence.Append(transitionTween);
+                    sequence.Append(rotationTween);
+                    sequence.Append(movementTween);
+                    durationMultiplier = 1;
+                }
+
+                //only walking
+                else if (currentState == State.Walk)
+                {
+                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, rotation), .2f);
+                    movementTween = hamsterTransform.DOMove(item.wayPoint.position, walkTweenDuration * durationMultiplier).SetEase(Ease.Linear);
+
+                    movementTween.OnPlay(() =>
+                    {
+                        SetState(State.Walk);
+                    });
+
+                    sequence.Append(rotationTween);
+                    sequence.Append(movementTween);
+                    durationMultiplier = 1;
+                }
+
+                //default, this will be changed
                 else
                 {
-                    sequence.Append(hamsterTransform.DORotate(new Vector3(0, 0, 0), .2f));
-                    tween = hamsterTransform.DOMove(item.wayPoint.position, climbTweenDuration);
-                    sequence.Append(tween);
-                }
+                    rotationTween = hamsterTransform.DORotate(new Vector3(0, 0, 0), .2f);
+                    movementTween = hamsterTransform.DOMove(item.wayPoint.position, climbTweenDuration * durationMultiplier).SetEase(Ease.Linear);
 
-                lastWayPoint = item.wayPoint.position;
-                iterator++;
+                    sequence.Append(rotationTween);
+                    sequence.Append(movementTween);
+                    durationMultiplier = 1;
+                }
+                lastWayPoint = item.parent.indexer;
             }
         }
-
-        Debug.Log("added waypoint to sequence");
+        Debug.Log("finished constructing sequence");
         MoveThroughPipes(sequence);
     }
 
-
     void MoveThroughPipes(Sequence seq)
     {
-        hamsterImage.DOFade(.7f, .1f);
         seq.Play();
-        //OnStartedSequence.Invoke();
         seq.OnComplete(() =>
         {
+            SetState(State.Walk);
             hamsterTransform.DORotate(new Vector3(0, 0, 0), .2f).OnComplete(() =>
             {
-                hamsterTransform.DOMove(endPosition.position, 1).OnComplete(() =>
+                hamsterTransform.DOMove(endPosition.position, climbTweenDuration).OnComplete(() =>
                 {
+                    hamsterImage.color = new Color(hamsterImage.color.r, hamsterImage.color.g, hamsterImage.color.b, 1);
                     OnSequenceEnd.Invoke();
                 });
             });
-            
         });
-        hamsterImage.DOFade(1, .1f);
         Debug.Log("playing sequence");
     }
+
 
 
     Vector2 GetNormalizedRoundedDirection(Vector2 startPos, Vector2 endPos)
@@ -151,6 +285,7 @@ public class HamsterController : MonoBehaviour
         Vector2 holder = (endPos - startPos);
         holder.Normalize();
         holder = new Vector2(Mathf.Round(holder.x), Mathf.Round(holder.y));
+
         return holder;
     }
 
@@ -161,25 +296,25 @@ public class HamsterController : MonoBehaviour
             case Vector2 v when v == new Vector2(1, 1):
                 {
 
-                    return 45;
+                    return -45;
                 }
 
             case Vector2 v when v == new Vector2(1, -1):
                 {
 
-                    return -45;
+                    return 45;
                 }
 
             case Vector2 v when v == new Vector2(-1, -1):
                 {
 
-                    return 45;
+                    return -45;
                 }
 
             case Vector2 v when v == new Vector2(-1, 1):
                 {
 
-                    return -45;
+                    return 45;
                 }
 
             default:
@@ -223,13 +358,13 @@ public class HamsterController : MonoBehaviour
 
                     return State.Walk;
                 }
-            case Vector2 v when v == new Vector2(0, 1):
+            case Vector2 v when v == new Vector2(0, -1):
                 {
 
                     return State.Climb;
                 }
 
-            case Vector2 v when v == new Vector2(0, -1):
+            case Vector2 v when v == new Vector2(0, 1):
                 {
 
                     return State.Fall;
@@ -249,13 +384,26 @@ public class HamsterController : MonoBehaviour
         {
             case State.Idle:
                 {
-                    anim.SetTrigger("IdleToWalkTrigger");
+                    previousState = currentState;
+                    currentState = state;
+                    anim.SetTrigger("Idle");
                     Debug.Log("idle");
+                    break;
+                }
+
+            case State.IdleToWalk:
+                {
+                    previousState = currentState;
+                    currentState = state;
+                    anim.SetTrigger("IdleToWalkTrigger");
+                    Debug.Log("idletowalk");
                     break;
                 }
 
             case State.Walk:
                 {
+                    previousState = currentState;
+                    currentState = state;
                     anim.SetTrigger("WalkTrigger");
                     Debug.Log("walk");
                     break;
@@ -263,6 +411,8 @@ public class HamsterController : MonoBehaviour
 
             case State.Climb:
                 {
+                    previousState = currentState;
+                    currentState = state;
                     anim.SetTrigger("ClimbTrigger");
                     Debug.Log("climb");
                     break;
@@ -270,6 +420,8 @@ public class HamsterController : MonoBehaviour
 
             case State.Fall:
                 {
+                    previousState = currentState;
+                    currentState = state;
                     anim.SetTrigger("FallTrigger");
                     Debug.Log("fall");
                     break;
@@ -277,25 +429,46 @@ public class HamsterController : MonoBehaviour
 
             case State.WalkTwice:
                 {
+                    previousState = currentState;
+                    currentState = state;
                     anim.SetTrigger("WalkTwiceTrigger");
                     Debug.Log("walk twice");
                     break;
                 }
 
-            case State.WalkTo:
+            case State.WalkToClimb:
                 {
-                    Debug.Log("walkto");
+                    previousState = currentState;
+                    currentState = state;
+                    anim.SetTrigger("WalkToClimb");
+                    Debug.Log("walktoclimb");
                     break;
                 }
 
-            case State.ToWalk:
+            case State.ClimbToWalk:
                 {
-                    Debug.Log("towalk");
+                    previousState = currentState;
+                    currentState = state;
+                    anim.SetTrigger("ClimbToWalk");
+                    Debug.Log("climbtowalk");
+                    break;
+                }
+            case State.Land:
+                {
+                    previousState = currentState;
+                    currentState = state;
+                    anim.SetTrigger("Land");
+                    Debug.Log("land");
                     break;
                 }
 
             default:
                 break;
         }
+    }
+
+    void KillAllTweens()
+    {
+        DOTween.KillAll();
     }
 }

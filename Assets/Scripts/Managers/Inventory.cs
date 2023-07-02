@@ -14,11 +14,22 @@ public class Inventory : MonoBehaviour
 
     private void Start()
     {
-        PipeController.OnSendToInventoryRequest += SetPipeToEmptySlot;
-        PipeController.SentPipeBackToInventory += ReturnPipeToInventory;
         CreateInventoryItems();
         SetIndexersForSlots();
         SetInventoryPipesParents();
+    }
+
+
+    private void OnEnable()
+    {
+        PipeController.OnSendToInventoryRequest += SetPipeToEmptySlot;
+        PipeController.SentPipeBackToInventory += ReturnPipeToInventory;
+    }
+
+    private void OnDestroy()
+    {
+        PipeController.OnSendToInventoryRequest -= SetPipeToEmptySlot;
+        PipeController.SentPipeBackToInventory -= ReturnPipeToInventory;
     }
 
     void ReturnPipeToInventory(Vector2 index, Pipe pipe)

@@ -29,7 +29,7 @@ RectTransform:
   m_GameObject: {fileID: 2652714774492428357}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 1}
-  m_LocalScale: {x: 0.85, y: 0.85, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2296280962825733113}
@@ -101,6 +101,7 @@ MonoBehaviour:
   position: {x: 0, y: 0}
   isConnected: 0
   moveable: 1
+  isStraight: 0
   isGoalPiece: 0
   exitPoints:
   - {x: 0, y: 0}
@@ -144,7 +145,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7957273108859890212}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.11761833, y: -1.2352797, z: 0.022021294}
+  m_LocalPosition: {x: -2, y: -2.3, z: 0.022021294}
   m_LocalScale: {x: 1.1764705, y: 1.1764705, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
