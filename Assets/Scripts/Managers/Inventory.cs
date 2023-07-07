@@ -12,14 +12,12 @@ public class Inventory : MonoBehaviour
     public List<InventorySlot> slots = new List<InventorySlot>();
     [SerializeField] Vector2 inventorySize;
 
-
     private void Start()
     {
         CreateInventoryItems();
         SetIndexersForSlots();
         SetInventoryPipesParents();
     }
-
 
     private void OnEnable()
     {
@@ -31,6 +29,8 @@ public class Inventory : MonoBehaviour
     {
         PipeController.OnSendToInventoryRequest -= SetPipeToEmptySlot;
         PipeController.SentPipeBackToInventory -= ReturnPipeToInventory;
+        slots.Clear();
+        inventory.Clear();
     }
 
     void ReturnPipeToInventory(Vector2 index, Pipe pipe)

@@ -44,16 +44,11 @@ public class HamsterController : MonoBehaviour
         Dance
     }
 
-
-    void Start()
+    private void OnEnable()
     {
         hamsterTransform = transform;
         hamsterImage = GetComponent<Image>();
         anim = GetComponent<Animator>();
-    }
-
-    private void OnEnable()
-    {
         BoardManager.OnPathComplete += CreateSequenceTest;
         GameManager.OnChangedScene += KillAllTweens;
     }
