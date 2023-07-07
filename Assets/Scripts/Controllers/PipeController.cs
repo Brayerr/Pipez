@@ -29,11 +29,11 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Right && pipeToControll.moveable) 
-            pipeToControll.RotatePipe();
+        //if (eventData.button == PointerEventData.InputButton.Right && pipeToControll.moveable) 
+        //    pipeToControll.RotatePipe();
 
 
-        else if (pipeToControll.parent.entity == InventorySlot.Entity.Grid && eventData.button == PointerEventData.InputButton.Left 
+        if (pipeToControll.parent.entity == InventorySlot.Entity.Grid && eventData.button == PointerEventData.InputButton.Left 
             && pipeToControll.moveable)
         {
             lastSlot = pipeToControll.parent.GetComponent<InventorySlot>();

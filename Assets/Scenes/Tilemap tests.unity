@@ -20773,6 +20773,10 @@ PrefabInstance:
       propertyPath: boardCanvas
       value: 
       objectReference: {fileID: 1288192571}
+    - target: {fileID: 7973269256497426165, guid: b5cbdbaf3421a8d4a820c8dfa648472b, type: 3}
+      propertyPath: inventoryCanvas
+      value: 
+      objectReference: {fileID: 1853122563}
     - target: {fileID: 7973269256497426166, guid: b5cbdbaf3421a8d4a820c8dfa648472b, type: 3}
       propertyPath: m_RootOrder
       value: 6
