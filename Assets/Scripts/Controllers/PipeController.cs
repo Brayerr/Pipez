@@ -33,8 +33,7 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         //    pipeToControll.RotatePipe();
 
 
-        if (pipeToControll.parent.entity == InventorySlot.Entity.Grid && eventData.button == PointerEventData.InputButton.Left 
-            && pipeToControll.moveable)
+        if (pipeToControll.moveable && pipeToControll.parent.entity == InventorySlot.Entity.Grid && eventData.button == PointerEventData.InputButton.Left )
         {
             lastSlot = pipeToControll.parent.GetComponent<InventorySlot>();
             OnSendToInventoryRequest.Invoke(pipeToControll,lastSlot);
