@@ -43,7 +43,7 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (pipeToControll.moveable)
+        if (eventData.button == PointerEventData.InputButton.Left && pipeToControll.moveable)
         {
             lastSlot = GetComponentInParent<InventorySlot>();
             lastPos = transform.position;
