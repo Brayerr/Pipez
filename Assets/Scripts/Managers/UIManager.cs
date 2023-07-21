@@ -3,9 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.UI;
+using System;
 
 public class UIManager : MonoBehaviour
 {
+    public static event Action GamePaused;
+    public static event Action GameUnpaused;
+    public static Action PlayClickSound;
+    public static Action PlayClackSound;
+
     [SerializeField] Canvas? boardCanvas;
     [SerializeField] Canvas? inventoryCanvas;
     [SerializeField] Camera? mainCam;
@@ -49,6 +55,7 @@ public class UIManager : MonoBehaviour
     {
         if (!pauseMenuOpen)
         {
+            PlayClickSound.Invoke();
             Sequence seq = DOTween.Sequence();
             seq.Append(pauseMenu.DOFade(1, .4f));
             seq.Join(pauseMenu.transform.DOScale(1, .4f));
@@ -57,10 +64,15 @@ public class UIManager : MonoBehaviour
                 pauseMenu.gameObject.SetActive(true);
             });
             seq.Play();
+            seq.OnComplete(() =>
+            {
+                GamePaused.Invoke();
+            });
             pauseMenuOpen = true;
         }
         else
         {
+            PlayClackSound.Invoke();
             Sequence seq = DOTween.Sequence();
             seq.Append(pauseMenu.DOFade(0, .4f));
             seq.Join(pauseMenu.transform.DOScale(0.1f, .4f));
@@ -68,6 +80,7 @@ public class UIManager : MonoBehaviour
             seq.OnComplete(() =>
             {
                 pauseMenu.gameObject.SetActive(false);
+                GameUnpaused.Invoke();
             });
             pauseMenuOpen = false;
         }
@@ -89,6 +102,7 @@ public class UIManager : MonoBehaviour
 
     public void CloseVictoryMenu()
     {
+        PlayClickSound.Invoke();
         Sequence seq = DOTween.Sequence();
         seq.Append(VictoryMenu.DOFade(0, .4f));
         seq.Join(VictoryMenu.transform.DOScale(0.1f, .4f));

@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     public static event Action OnClickedEsc;
     public static event Action OnChangedScene;
     int currentScene;
+    public static bool gamePaused;
 
     private void Start()
     {
@@ -18,11 +19,28 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape)) OnClickedEsc.Invoke();
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            UIManager.PlayClickSound.Invoke();
+            OnClickedEsc.Invoke();
+        }
+    }
+
+    private void OnEnable()
+    {
+        UIManager.GamePaused += GamePaused;
+        UIManager.GameUnpaused += GameUnpaused;
+    }
+
+    private void OnDestroy()
+    {
+        UIManager.GamePaused -= GamePaused;
+        UIManager.GameUnpaused -= GameUnpaused;
     }
 
     public void LoadMainMenu()
     {
+        UIManager.PlayClickSound.Invoke();
         SceneManager.LoadScene(0);
         OnChangedScene.Invoke();
         currentScene = 0;
@@ -30,6 +48,7 @@ public class GameManager : MonoBehaviour
 
     public void LoadLevel1()
     {
+        UIManager.PlayClickSound.Invoke();
         SceneManager.LoadScene(1);
         //OnChangedScene.Invoke();
         currentScene = 1;
@@ -37,6 +56,7 @@ public class GameManager : MonoBehaviour
 
     public void LoadLevel2()
     {
+        UIManager.PlayClickSound.Invoke();
         SceneManager.LoadScene(2);
         OnChangedScene.Invoke();
         currentScene = 2;
@@ -44,6 +64,7 @@ public class GameManager : MonoBehaviour
 
     public void LoadLevel3()
     {
+        UIManager.PlayClickSound.Invoke();
         SceneManager.LoadScene(3);
         OnChangedScene.Invoke();
         currentScene = 3;
@@ -51,6 +72,7 @@ public class GameManager : MonoBehaviour
 
     public void LoadNextLevel()
     {
+        UIManager.PlayClickSound.Invoke();
         SceneManager.LoadScene(currentScene + 1);
         OnChangedScene.Invoke();
         currentScene++;
@@ -58,6 +80,17 @@ public class GameManager : MonoBehaviour
 
     public void QuitGame()
     {
+        UIManager.PlayClickSound.Invoke();
         Application.Quit();
+    }
+
+    void GamePaused()
+    {
+        gamePaused = true;
+    }
+
+    void GameUnpaused()
+    {
+        gamePaused = false;
     }
 }

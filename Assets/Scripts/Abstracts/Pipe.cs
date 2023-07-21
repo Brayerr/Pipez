@@ -4,12 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
+using DG.Tweening;
 
 public abstract class Pipe : MonoBehaviour
 {
 
     public static Action<Vector2, InventorySlot.Entity> OnPickedPipe;
     public static Action OnPipeTransformChanged;
+    public static event Action RotatedPipe;
 
     public State state;
     public PipeColor color;
@@ -56,7 +58,9 @@ public abstract class Pipe : MonoBehaviour
     public virtual void RotatePipe()
     {
         transform.Rotate(new Vector3(0, 0, -90));
-        if (state == State.inGrid) OnPipeTransformChanged.Invoke();
+        RotatedPipe.Invoke();
+        //transform.DORotate(new Vector3(0, 0, -90), .1f, RotateMode.WorldAxisAdd);
+        if (state == State.inGrid || state == State.inDrag) OnPipeTransformChanged.Invoke();
     }
 
     public void SetState(State state)
@@ -66,19 +70,31 @@ public abstract class Pipe : MonoBehaviour
             case State.inInventory:
                 {
                     this.state = state;
-                    transform.localScale = new Vector3(.5f, .5f, 1);
+                    transform.DOScale(.5f, .1f).OnComplete(() =>
+                    {
+                        transform.DOScale(.4f, .1f).OnComplete(() =>
+                        {
+                            transform.DOScale(.5f, .1f);
+                        });
+                    });
                     break;
                 }
             case State.inGrid:
                 {
                     this.state = state;
-                    transform.localScale = new Vector3(.85f, .85f, 1);
+                    transform.DOScale(.85f, .1f).OnComplete(() =>
+                    {
+                        transform.DOScale(.75f, .1f).OnComplete(() =>
+                        {
+                            transform.DOScale(.85f, .1f);
+                        });
+                    });
                     break;
                 }
             case State.inDrag:
                 {
                     this.state = state;
-                    transform.localScale = new Vector3(.85f, .85f, 1);
+                    transform.DOScale(.85f, .1f);
                     break;
                 }
         }

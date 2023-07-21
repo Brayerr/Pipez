@@ -11,6 +11,9 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
     public static event Action OnDraggingPipeEnd;
     public static event Action<Vector2, Pipe> SentPipeBackToInventory;
     public static event Action<Vector2, Pipe> SentPipeBackToBoard;
+    public static event Action PlacedPipe;
+    public static event Action PickedPipe;
+    public static event Action ReturnedPipe;
 
     [SerializeField] Pipe pipeToControll;
     public InventorySlot lastSlot;
@@ -23,7 +26,7 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
     private void Update()
     {
-        if (pipeToControll.state == Pipe.State.inDrag && Input.GetMouseButtonUp(1))
+        if (!GameManager.gamePaused && pipeToControll.state == Pipe.State.inDrag && Input.GetMouseButtonUp(1))
             pipeToControll.RotatePipe();
     }
 
@@ -33,7 +36,7 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         //    pipeToControll.RotatePipe();
 
 
-        if (pipeToControll.moveable && pipeToControll.parent.entity == InventorySlot.Entity.Grid && eventData.button == PointerEventData.InputButton.Left)
+        if (!GameManager.gamePaused && pipeToControll.moveable && pipeToControll.parent.entity == InventorySlot.Entity.Grid && eventData.button == PointerEventData.InputButton.Left)
         {
             lastSlot = pipeToControll.parent.GetComponent<InventorySlot>();
             OnSendToInventoryRequest.Invoke(pipeToControll, lastSlot);
@@ -43,10 +46,11 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (!GameManager.gamePaused && eventData.button == PointerEventData.InputButton.Left)
         {
             if (pipeToControll.moveable)
             {
+                PickedPipe.Invoke();
                 lastSlot = GetComponentInParent<InventorySlot>();
                 lastPos = transform.position;
                 pipeToControll.SetState(Pipe.State.inDrag);
@@ -60,7 +64,7 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (!GameManager.gamePaused && eventData.button == PointerEventData.InputButton.Left)
         {
 
             if (pipeToControll.moveable)
@@ -72,7 +76,7 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (!GameManager.gamePaused && eventData.button == PointerEventData.InputButton.Left)
         {
 
             pipeToControll.image.raycastTarget = true;
@@ -100,30 +104,46 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
     void PlacePipe(InventorySlot slot)
     {
-        pipeToControll.parentAfterDrag = slot.transform;
-        pipeToControll.RepositionPipe(pipeToControll.parentAfterDrag);
-        slot.pipeObject = pipeToControll;
-        slot.state = InventorySlot.State.Occupied;
-
-        if (pipeToControll.parent.entity == InventorySlot.Entity.Grid) pipeToControll.SetState(Pipe.State.inGrid);
-        else if (pipeToControll.parent.entity == InventorySlot.Entity.Inventory) pipeToControll.SetState(Pipe.State.inInventory);
-
-        if (pipeToControll.parent.entity == InventorySlot.Entity.Grid) Pipe.OnPipeTransformChanged.Invoke();
-
-        if (pipeToControll.parent != null && pipeToControll.parent.obstacleObject == null)
+        if (!GameManager.gamePaused)
         {
-            Pipe.OnPickedPipe.Invoke(lastSlot.indexer, lastSlot.entity);
+            pipeToControll.parentAfterDrag = slot.transform;
+            pipeToControll.RepositionPipe(pipeToControll.parentAfterDrag);
+            slot.pipeObject = pipeToControll;
+            slot.state = InventorySlot.State.Occupied;
+
+            if (pipeToControll.parent.entity == InventorySlot.Entity.Grid) pipeToControll.SetState(Pipe.State.inGrid);
+            else if (pipeToControll.parent.entity == InventorySlot.Entity.Inventory) pipeToControll.SetState(Pipe.State.inInventory);
+
+            /*if (pipeToControll.parent.entity == InventorySlot.Entity.Grid) */Pipe.OnPipeTransformChanged.Invoke();
+
+            if (pipeToControll.parent != null && pipeToControll.parent.obstacleObject == null)
+            {
+                Pipe.OnPickedPipe.Invoke(lastSlot.indexer, lastSlot.entity);
+            }
+            pipeToControll.rectTransform.localPosition = new Vector3(pipeToControll.rectTransform.localPosition.x, pipeToControll.rectTransform.localPosition.y, 1);
+            PlacedPipe.Invoke();
         }
-        pipeToControll.rectTransform.localPosition = new Vector3(pipeToControll.rectTransform.localPosition.x, pipeToControll.rectTransform.localPosition.y, 1);
 
     }
 
     void ReturnPipe()
     {
-        pipeToControll.RepositionPipe(lastSlot.transform);
-        pipeToControll.transform.position = lastPos;
-        if (lastSlot.entity == InventorySlot.Entity.Inventory) SentPipeBackToInventory.Invoke(lastSlot.indexer, pipeToControll);
-        else if (lastSlot.entity == InventorySlot.Entity.Grid) SentPipeBackToBoard.Invoke(lastSlot.indexer, pipeToControll);
+        if (!GameManager.gamePaused)
+        {
+            pipeToControll.RepositionPipe(lastSlot.transform);
+            pipeToControll.transform.position = lastPos;
+            if (lastSlot.entity == InventorySlot.Entity.Inventory)
+            {
+                ReturnedPipe.Invoke();
+                SentPipeBackToInventory.Invoke(lastSlot.indexer, pipeToControll);
+            }
+            else if (lastSlot.entity == InventorySlot.Entity.Grid)
+            {
+                ReturnedPipe.Invoke();
+                SentPipeBackToBoard.Invoke(lastSlot.indexer, pipeToControll);
+                Pipe.OnPipeTransformChanged.Invoke();
+            }
+        }
     }
 
     bool CheckSlotAvailability(InventorySlot slot)
