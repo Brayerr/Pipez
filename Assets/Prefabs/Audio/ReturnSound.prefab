@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7268361305697323732}
   - component: {fileID: 7268361305697323733}
   m_Layer: 0
-  m_Name: RotateSound
+  m_Name: ReturnSound
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42,7 +42,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 7bd22af422f3cb946b765ec223fa3b86, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 1b078ce1924d5724d9861fa97ebc8d31, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1

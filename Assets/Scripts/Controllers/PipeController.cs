@@ -14,6 +14,7 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
     public static event Action PlacedPipe;
     public static event Action PickedPipe;
     public static event Action ReturnedPipe;
+    public static event Action FailedPlacingPipe;
 
     [SerializeField] Pipe pipeToControll;
     public InventorySlot lastSlot;
@@ -38,6 +39,7 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
         if (!GameManager.gamePaused && pipeToControll.moveable && pipeToControll.parent.entity == InventorySlot.Entity.Grid && eventData.button == PointerEventData.InputButton.Left)
         {
+            ReturnedPipe.Invoke();
             lastSlot = pipeToControll.parent.GetComponent<InventorySlot>();
             OnSendToInventoryRequest.Invoke(pipeToControll, lastSlot);
             Pipe.OnPipeTransformChanged.Invoke();
@@ -134,12 +136,12 @@ public class PipeController : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
             pipeToControll.transform.position = lastPos;
             if (lastSlot.entity == InventorySlot.Entity.Inventory)
             {
-                ReturnedPipe.Invoke();
+                FailedPlacingPipe.Invoke();
                 SentPipeBackToInventory.Invoke(lastSlot.indexer, pipeToControll);
             }
             else if (lastSlot.entity == InventorySlot.Entity.Grid)
             {
-                ReturnedPipe.Invoke();
+                FailedPlacingPipe.Invoke();
                 SentPipeBackToBoard.Invoke(lastSlot.indexer, pipeToControll);
                 Pipe.OnPipeTransformChanged.Invoke();
             }

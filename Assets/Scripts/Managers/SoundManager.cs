@@ -4,22 +4,25 @@ using UnityEngine;
 
 public class SoundManager : MonoBehaviour
 {
-    [SerializeField] AudioSource pickUpSource;
-    [SerializeField] AudioSource placedSource;
-    [SerializeField] AudioSource nopeSource;
+    [SerializeField] AudioSource[] pickUpSources = new AudioSource[3];
+    [SerializeField] AudioSource[] placedSources = new AudioSource[3];
+    [SerializeField] AudioSource[] nopeSources = new AudioSource[3];
     [SerializeField] AudioSource rotateSource;
     [SerializeField] AudioSource clickSource;
     [SerializeField] AudioSource clackSource;
+    [SerializeField] AudioSource returnSource;
 
+    int chosenIndex;
 
     private void OnEnable()
     {
         PipeController.PlacedPipe += PlayPlacedSound;
         Pipe.RotatedPipe += PlayRotateSound;
         PipeController.PickedPipe += PlayPickUpSound;
-        PipeController.ReturnedPipe += PlayNopeSound;
+        PipeController.FailedPlacingPipe += PlayNopeSound;
         UIManager.PlayClickSound += PlayClickSound;
         UIManager.PlayClackSound += PlayClackSound;
+        PipeController.ReturnedPipe += PlayReturnSound;
     }
 
     private void OnDestroy()
@@ -27,23 +30,32 @@ public class SoundManager : MonoBehaviour
         PipeController.PlacedPipe -= PlayPlacedSound;
         Pipe.RotatedPipe -= PlayRotateSound;
         PipeController.PickedPipe -= PlayPickUpSound;
-        PipeController.ReturnedPipe -= PlayNopeSound;
+        PipeController.FailedPlacingPipe -= PlayNopeSound;
         UIManager.PlayClickSound -= PlayClickSound;
         UIManager.PlayClackSound -= PlayClackSound;
+        PipeController.ReturnedPipe -= PlayReturnSound;
+
     }
 
+    void PlayReturnSound()
+    {
+        returnSource.Play();
+    }
     void PlayPlacedSound()
     {
-        placedSource.Play();
+        chosenIndex = Random.Range(0, 3);
+        placedSources[chosenIndex].Play();
     }
 
     void PlayPickUpSound()
     {
-        pickUpSource.Play();
+        chosenIndex = Random.Range(0, 3);
+        pickUpSources[chosenIndex].Play();
     }
     void PlayNopeSound()
     {
-        nopeSource.Play();
+        chosenIndex = Random.Range(0, 3);
+        nopeSources[chosenIndex].Play();
     }
     void PlayRotateSound()
     {
