@@ -11,6 +11,7 @@ public class SoundManager : MonoBehaviour
     [SerializeField] AudioSource clickSource;
     [SerializeField] AudioSource clackSource;
     [SerializeField] AudioSource returnSource;
+    [SerializeField] AudioSource mainMenuBGMSource;
 
     int chosenIndex;
 
@@ -23,6 +24,7 @@ public class SoundManager : MonoBehaviour
         UIManager.PlayClickSound += PlayClickSound;
         UIManager.PlayClackSound += PlayClackSound;
         PipeController.ReturnedPipe += PlayReturnSound;
+        GameManager.OnLoadedMainMenu += PlayMainMenuBGM;
     }
 
     private void OnDestroy()
@@ -34,7 +36,13 @@ public class SoundManager : MonoBehaviour
         UIManager.PlayClickSound -= PlayClickSound;
         UIManager.PlayClackSound -= PlayClackSound;
         PipeController.ReturnedPipe -= PlayReturnSound;
+        GameManager.OnLoadedMainMenu -= PlayMainMenuBGM;
 
+    }
+
+    void PlayMainMenuBGM()
+    {
+        mainMenuBGMSource.Play();
     }
 
     void PlayReturnSound()

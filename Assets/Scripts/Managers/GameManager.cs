@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
 {
     public static event Action OnClickedEsc;
     public static event Action OnChangedScene;
+    public static event Action OnLoadedMainMenu;
     int currentScene;
     public static bool gamePaused;
 
@@ -44,6 +45,9 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(0);
         OnChangedScene.Invoke();
         currentScene = 0;
+        UIManager.GameUnpaused.Invoke();
+
+        //OnLoadedMainMenu.Invoke();
     }
 
     public void LoadLevel1()

@@ -8,7 +8,7 @@ using System;
 public class UIManager : MonoBehaviour
 {
     public static event Action GamePaused;
-    public static event Action GameUnpaused;
+    public static Action GameUnpaused;
     public static Action PlayClickSound;
     public static Action PlayClackSound;
 
