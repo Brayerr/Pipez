@@ -8,6 +8,8 @@ using System;
 public class HamsterController : MonoBehaviour
 {
     public static event Action OnSequenceEnd;
+    public static event Action OnDance;
+    public static event Action OnSequenceStart;
 
     [SerializeField] BoardManager boardManager;
     [SerializeField] Transform hamsterTransform;
@@ -646,6 +648,7 @@ public class HamsterController : MonoBehaviour
     void MoveThroughPipes(Sequence seq)
     {
         seq.Play();
+        OnSequenceStart.Invoke();
         seq.OnComplete(() =>
         {
             if (currentState == State.Walk)
@@ -664,6 +667,7 @@ public class HamsterController : MonoBehaviour
                             hamsterTransform.DOScaleZ(.5f, 2).OnPlay(() =>
                             {
                                 SetState(State.Dance);
+                                OnDance.Invoke();
                             }).OnComplete(() =>
                             {
                                 OnSequenceEnd.Invoke();
@@ -694,6 +698,7 @@ public class HamsterController : MonoBehaviour
                                 hamsterTransform.DOScaleZ(.5f, 2).OnPlay(() =>
                                 {
                                     SetState(State.Dance);
+                                    OnDance.Invoke();
                                 }).OnComplete(() =>
                                 {
                                     OnSequenceEnd.Invoke();
